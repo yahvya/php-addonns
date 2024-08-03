@@ -11,4 +11,3 @@
 **N'oubliez pas d'ajouter le nécessaire pour l'auto-loading en fonction du contexte de votre projet.**
 
 # Liste des utilitaires disponibles :
-
