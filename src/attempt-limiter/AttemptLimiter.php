@@ -35,11 +35,19 @@ class AttemptLimiter{
 
         // suppression de la limitation pour temps passé
         if($_SESSION[self::SESSION_STORAGE_KEY][$callableUniqueKey]["supposedEndTime"] - time() <= 0){
-            unset($_SESSION[self::SESSION_STORAGE_KEY][$callableUniqueKey]);
+            self::removeAttempts(callable: $callable);
             return true;
         }
 
         return false;
+    }
+
+    /**
+     * @brief Supprime les tentatives enregistrés
+     * @param array $callable callable
+     */
+    public static function removeAttempts(array $callable):void{
+        unset($_SESSION[self::SESSION_STORAGE_KEY][self::getCallableUniqueKey(callable: $callable)]);
     }
 
     /**
@@ -99,18 +107,26 @@ class AttemptLimiter{
             case AttemptErrorMarker::ERROR_MARKER:
                 if($callResult === AttemptErrorMarker::ERROR_MARKER)
                     self::registerAttempt(callable: $callable,limiterDescription: $limiterDescription);
+                else if($limiterDescription->resetOnSuccess)
+                    self::removeAttempts(callable: $callable);
 
                 return $callResult;
 
             case AttemptErrorMarker::FALSE_RETURNED:
                 if($callResult === false)
                     self::registerAttempt(callable: $callable,limiterDescription: $limiterDescription);
+                else if($limiterDescription->resetOnSuccess)
+                    self::removeAttempts(callable: $callable);
 
                 return $callResult;
 
             case AttemptErrorMarker::EXCEPTION_THROWN:
-                if(empty($exception) )
+                if(empty($exception) ){
+                    if($limiterDescription->resetOnSuccess)
+                        self::removeAttempts(callable: $callable);
+
                     return $callResult;
+                }
 
                 self::registerAttempt(callable: $callable,limiterDescription: $limiterDescription);
 
@@ -119,6 +135,8 @@ class AttemptLimiter{
             case AttemptErrorMarker::NULL_RETURNED:
                 if($callResult === null)
                     self::registerAttempt(callable: $callable,limiterDescription: $limiterDescription);
+                else if($limiterDescription->resetOnSuccess)
+                    self::removeAttempts(callable: $callable);
 
                 return $callResult;
         }
