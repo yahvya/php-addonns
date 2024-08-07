@@ -47,6 +47,6 @@ class TestClass{
 use PhpAddons\AttemptLimiter\AttemptLimiter;
 
 AttemptLimiter::attempt(callable: [TestClass::class,"testFunction"],args: ["yahvya"]);
-AttemptLimiter::attempt(callable: [TestClass::class,"testFunction"],args: ["yahvya"],onError: function(){ echo "erreur" });
+AttemptLimiter::attempt(callable: [TestClass::class,"testFunction"],args: ["yahvya"],onError: function(){ echo "erreur"; });
 ```
 
