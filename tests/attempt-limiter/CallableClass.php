@@ -1,6 +1,6 @@
 <?php
 
-namespace Test\PhpAddons\AttemptLimiter;
+namespace Tests\AttemptLimiter;
 
 use Exception;
 use PhpAddons\AttemptLimiter\AttemptErrorMarker;
@@ -9,7 +9,7 @@ use PhpAddons\AttemptLimiter\AttemptLimitable;
 class CallableClass{
     #[AttemptLimitable(
         countOfAttempt: 2,
-        timeBeforeNextAttempt: 5,
+        timeBeforeNextAttempt: 2,
         errorMarker: AttemptErrorMarker::FALSE_RETURNED,
         resetOnSuccess: true
     )]
@@ -19,7 +19,7 @@ class CallableClass{
 
     #[AttemptLimitable(
         countOfAttempt: 4,
-        timeBeforeNextAttempt: 5,
+        timeBeforeNextAttempt: 2,
         errorMarker: AttemptErrorMarker::EXCEPTION_THROWN,
         resetOnSuccess: true
     )]

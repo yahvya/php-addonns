@@ -21,7 +21,7 @@ class AttemptLimiter{
      * @return bool si une tentative peut être faîtes
      * @attention Peut mettre à jour les données de limitation
      */
-    public static function checkCanAttempt(array $callable):bool{
+    protected static function checkCanAttempt(array $callable):bool{
         $callableUniqueKey = self::getCallableUniqueKey(callable: $callable);
 
         if($callableUniqueKey === NULL)
@@ -46,7 +46,7 @@ class AttemptLimiter{
      * @brief Supprime les tentatives enregistrés
      * @param array $callable callable
      */
-    public static function removeAttempts(array $callable):void{
+    protected static function removeAttempts(array $callable):void{
         unset($_SESSION[self::SESSION_STORAGE_KEY][self::getCallableUniqueKey(callable: $callable)]);
     }
 
@@ -55,25 +55,26 @@ class AttemptLimiter{
      * @param array $callable callable
      * @param AttemptLimitable $limiterDescription Description de limitation
      */
-    public static function registerAttempt(array $callable,AttemptLimitable $limiterDescription):void{
+    protected static function registerAttempt(array $callable,AttemptLimitable $limiterDescription):void{
         $callableUniqueKey = self::getCallableUniqueKey(callable: $callable);
 
         // vérification d'existence ou création
         if(empty($_SESSION[self::SESSION_STORAGE_KEY][$callableUniqueKey])){
-            $_SESSION[self::SESSION_STORAGE_KEY][$callableUniqueKey][$callableUniqueKey] = [
-                "countOfAttempts" => 1
+            $_SESSION[self::SESSION_STORAGE_KEY][$callableUniqueKey] = [
+                "countOfAttempts" => 0
             ];
         }
 
         // récupération des données
-        $limitationDatas = $_SESSION[self::SESSION_STORAGE_KEY][$callableUniqueKey][$callableUniqueKey];
+        $limitationDatas = $_SESSION[self::SESSION_STORAGE_KEY][$callableUniqueKey];
         $limitationDatas["countOfAttempts"]++;
+
 
         // enregistrement du temps de fin
         if($limitationDatas["countOfAttempts"] >= $limiterDescription->countOfAttempt)
             $limitationDatas["supposedEndTime"] = time() + $limiterDescription->timeBeforeNextAttempt;
 
-        $_SESSION[self::SESSION_STORAGE_KEY][$callableUniqueKey][$callableUniqueKey] = $limitationDatas;
+        $_SESSION[self::SESSION_STORAGE_KEY][$callableUniqueKey] = $limitationDatas;
     }
 
     /**
@@ -157,6 +158,7 @@ class AttemptLimiter{
             $reflection = new ReflectionMethod(objectOrMethod: $objectClassname,method: $method);
 
             $attributes = $reflection->getAttributes(name: AttemptLimitable::class);
+
 
             if(empty($attributes) )
                 return null;
