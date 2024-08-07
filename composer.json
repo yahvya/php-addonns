@@ -2,6 +2,12 @@
     "autoload": {
         "psr-4": {
             "PhpAddons\\AttemptLimiter\\" : "src/attempt-limiter"
-        }
+        },
+        "classmap": [
+            "tests"
+        ]
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^11.3"
     }
 }
