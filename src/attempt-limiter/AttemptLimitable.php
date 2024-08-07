@@ -17,10 +17,10 @@ class AttemptLimitable{
      * @param bool $resetOnSuccess si true, réinitialise les tentatives en cas de succès d'appel, sinon continue le décompte
      */
     public function __construct(
-        protected readonly int $countOfAttempt,
-        protected readonly int $timeBeforeNextAttempt,
-        protected readonly AttemptErrorMarker $errorMarker,
-        protected readonly bool $resetOnSuccess = true
+        public readonly int $countOfAttempt,
+        public readonly int $timeBeforeNextAttempt,
+        public readonly AttemptErrorMarker $errorMarker,
+        public readonly bool $resetOnSuccess = true
     ){
     }
 }
