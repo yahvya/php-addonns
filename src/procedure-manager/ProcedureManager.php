@@ -34,9 +34,7 @@ class ProcedureManager{
      * @attention déplace le curseur sur le précédent
      */
     public function previous():?ProcedureStep{
-        $nextIndex = $this->currentStepIndex - 1;
-
-        if(!empty($this->steps[$nextIndex])){
+        if(!empty($this->steps[$this->currentStepIndex - 1])){
             $this->currentStepIndex--;
             return $this->steps[$this->currentStepIndex];
         }
@@ -49,9 +47,7 @@ class ProcedureManager{
      * @attention déplace le curseur sur le suivant
      */
     public function next():?ProcedureStep{
-        $nextIndex = $this->currentStepIndex + 1;
-
-        if(!empty($this->steps[$nextIndex])){
+        if(!empty($this->steps[$this->currentStepIndex + 1])){
             $this->currentStepIndex++;
             return $this->steps[$this->currentStepIndex];
         }
@@ -65,7 +61,7 @@ class ProcedureManager{
      * @return $this
      */
     public function setCurrentStepIndex(int $step):ProcedureManager{
-        $this->currentStepIndex = $step;
+        $this->currentStepIndex = $step - 1;
 
         return $this;
     }
@@ -114,12 +110,10 @@ class ProcedureManager{
     /**
      * @brief Initialise une procédure
      * @param StepType ...$steps étape de la procédure
-     * @return ProcedureStep le gestionnaire créé
+     * @return ProcedureManager le gestionnaire créé
      */
-    public static function define(ProcedureStep... $steps):ProcedureStep{
-        $procedureManager = new ProcedureManager(steps: $steps);
-
-        return $procedureManager->current();
+    public static function define(ProcedureStep... $steps):ProcedureManager{
+        return new ProcedureManager(steps: $steps);
     }
 
     /**
