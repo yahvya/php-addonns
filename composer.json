@@ -1,7 +1,8 @@
 {
     "autoload": {
         "psr-4": {
-            "PhpAddons\\AttemptLimiter\\" : "src/attempt-limiter"
+            "PhpAddons\\AttemptLimiter\\" : "src/attempt-limiter",
+            "PhpAddons\\ProcedureManager\\" : "src/procedure-manager"
         },
         "classmap": [
             "tests"
