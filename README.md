@@ -13,3 +13,4 @@
 ## Liste des utilitaires disponibles :
 
 - Attempt Limiter "*utilitaire de limitation d'appel de fonction*"
+- Procedure Manager "*utilitaire de gestion de procédure (suite d'étapes)*"
