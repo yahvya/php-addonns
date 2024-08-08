@@ -7,6 +7,7 @@ use Throwable;
 /**
  * @brief Gestionnaire de procédure
  * @author yahaya https://github.com/yahvya
+ * @template StepType of ProcedureStep type d'étapes
  */
 class ProcedureManager{
     /**
@@ -15,21 +16,21 @@ class ProcedureManager{
     protected int $currentStepIndex;
 
     /**
-     * @param array $steps Etapes de la procédure
+     * @param StepType[] $steps Etapes de la procédure
      */
     protected function __construct(protected array $steps){
         $this->currentStepIndex = 0;
     }
 
     /**
-     * @return ProcedureStep|null L'étape actuelle de la procédure ou null si aucune étapes
+     * @return StepType|null L'étape actuelle de la procédure ou null si aucune étapes
      */
     public function current():?ProcedureStep{
         return $this->steps[$this->currentStepIndex] ?? null;
     }
 
     /**
-     * @return ProcedureStep|null l'étape précédente de la procédure
+     * @return StepType|null l'étape précédente de la procédure
      * @attention déplace le curseur sur le précédent
      */
     public function previous():?ProcedureStep{
@@ -44,7 +45,7 @@ class ProcedureManager{
     }
 
     /**
-     * @return ProcedureStep|null l'étape suivante de la procédure
+     * @return StepType|null l'étape suivante de la procédure
      * @attention déplace le curseur sur le suivant
      */
     public function next():?ProcedureStep{
@@ -79,7 +80,7 @@ class ProcedureManager{
     /**
      * @brief Met à jour les étapes
      * @attention Pensez à utiliser setStep si l'index doit être mis à jour
-     * @param ProcedureStep[] $steps étapes
+     * @param StepType[] $steps étapes
      * @return $this
      */
     public function setSteps(array $steps):ProcedureManager{
@@ -89,7 +90,7 @@ class ProcedureManager{
     }
 
     /**
-     * @return ProcedureStep[] les étapes
+     * @return StepType[] les étapes
      */
     public function getSteps():array{
         return $this->steps;
@@ -112,7 +113,7 @@ class ProcedureManager{
 
     /**
      * @brief Initialise une procédure
-     * @param ProcedureStep ...$steps étape de la procédure
+     * @param StepType ...$steps étape de la procédure
      * @return ProcedureStep le gestionnaire créé
      */
     public static function define(ProcedureStep... $steps):ProcedureStep{
