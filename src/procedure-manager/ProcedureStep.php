@@ -3,25 +3,14 @@
 namespace PhpAddons\ProcedureManager;
 
 /**
- * @brief Etape de procédure
- * @author yahaya https://github.com/yahvya
- * @template DatasType type des données
+ * @brief Description d'une étape de procédure
+ * @author yahaya https//github.com/yahvya
  */
 interface ProcedureStep{
     /**
-     * @return DatasType les données
+     * @param Procedure $procedure parent procedure
+     * @param mixed ...$args arguments
+     * @return bool Si l'étape est validée
      */
-    public function getDatas():mixed;
-
-    /**
-     * @brief Met à jour les données
-     * @param DatasType $datas nouvelles données
-     * @return $this
-     */
-    public function setDatas(mixed $datas):ProcedureStep;
-
-    /**
-     * @return bool si l'étape suivante du processus est accessible
-     */
-    public function canAccessNextStep():bool;
+    public function canAccessNext(Procedure $procedure,mixed ...$args):bool;
 }

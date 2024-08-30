@@ -1,67 +1,109 @@
-# Utilitaire d'exécution de procédure
+# Procedure manager
 
-> Cet utilitaire n'a aucune notice d'intégration supplémentaire
+> Utilitaire de gestion de procédure
 
-## Utilisation
+## Classes 
 
-> Cet utilitaire fonctionne en définissant en amont une suite d'étape décrivant une procédure, et sert à gérer l'avancement dans la procédure.
+- **Procedure** : class abstraite visant à être étendu pour définir une procédure
+- **ProcedureStep** : interface de description d'une étape de la procédure
 
-> Une réprésentation d'état par défaut est défini pour être généraliste ***DefaultProcedureStep***, toutefois des étapes personnalisées peuvent être définies.
+## Exemple d'utilisation
 
-
-**Phase d'initialisation du processus**
+Dans cet exemple, nous allons implémenter une procédure d'inscription.
 
 ```
-use PhpAddons\ProcedureManager\ProcedureManager;
+<?php
+
+use PhpAddons\ProcedureManager\Procedure;
 use PhpAddons\ProcedureManager\ProcedureStep;
-use PhpAddons\ProcedureManager\DefaultProcedureStep;
 
-class VerifyCodeStep implements ProcedureStep{
-    public function getDatas():mixed{ return []; }
-    
-    public function setDatas(mixed $datas):ProcedureStep { return $this; }
+/**
+ * @brief Etape d'enregistrement des données utilisateur
+ * @step 1
+ */
+class RegisterUserDatasStep implements ProcedureStep{
+    /**
+     * @param array $userDatas données utilisateurs
+     */
+    public function __construct(protected array $userDatas = []){}
 
-    public function canAccessNextStep():bool { 
-        // vérification de validation de code par exemple
+    public function canAccessNext(Procedure $procedure, ...$args): bool{
+        if(empty($_POST["email"]) || empty($_POST["password"]))
+            return false;
+
+        $this->userDatas = [
+            "email" => $_POST["email"],
+            "password" => $_POST["password"]
+        ];
+
+        return $this->sendVerificationMailTo($this->userDatas["email"]);
+    }
+
+    /**
+     * @return string|null le code de vérification
+     */
+    public function getCode():?string{
+        return $this->userDatas["verificationCode"] ?? null;
+    }
+
+    /**
+     * @brief Envoi le mail de vérification à l'utilisateur
+     * @param string $userEmail mail de l'utilisateur
+     * @return bool si l'envoi du mail de vérification réussi
+     */
+    protected function sendVerificationMailTo(string $userEmail):bool{
+        // envoi du mail de vérification
+
+        $this->userDatas["verificationCode"] = "code_de_verification";
         return true;
     }
 }
 
-function storeProcess(ProcedureManager $procedureManager):void{
-    $datas = $procedureManager->serialize();
+/**
+ * @brief Etape de vérification du code reçu par mail et enregistrement de l'utilisateur
+ * @step 2
+ */
+class VerifyUserCodeStep implements ProcedureStep{
+    public function canAccessNext(Procedure $procedure, ...$args): bool{
+        if(empty($_POST["code"]))
+            return false;
 
-    if($datas === null)
-        throw new Exception(message: "Echec d'initialisation");
-    
-    $_SESSION["STORE_KEY"] = $datas; 
-} 
+        // récupération du code de vérification
+        $verificationCode = $procedure
+            ->getStep(stepNumber: 1) // récupération de l'étape 1 de type RegisterUserDatasStep
+            ->getCode();
 
-storeProcedure(toStore: ProcedureManager::define(
-    new VerifyCodeStep(),
-    new DefaultProcedureStep(datas: ["validateInscription" => true]),
-    new DefaultProcedureStep(datas: ["finalize" => true],nextAccessVerifier: fn():bool => true)
-));  
-```
+        return $verificationCode === $_POST["code"] && $this->registerUser();
+    }
 
-**Utilisation**
-
-```
-use PhpAddons\ProcedureManager\ProcedureManager;   
-
-function getProcedure():?ProcedureManager{
-    return ProcedureManager::loadFrom(serializedVer: $_SESSION["STORE_KEY"]);
+    /**
+     * @return bool enregistre l'utilisateur
+     */
+    public function registerUser():bool{
+        return true;
+    }
 }
 
-$procedure = getProcedure();
+/**
+ * @brief Procédure d'inscription
+ */
+class RegistrationProcedure extends Procedure{
+    public function getSteps(): array{
+        return [
+            new RegisterUserDatasStep,
+            new VerifyUserCodeStep
+        ];
+    }
+}
 
-if($procedure === null)
-    throw new Exception(message: "Echec de chargement de la procédure");
-    
-if(empty($procedure->current()?->canAccessNextStep())
-    throw new Exception(message: "Action non autorisé");
-    
-if($procedure->next() === null)
-    echo "Fin de procédure";
-    
-storeProcedure(toStore: $procedure);
+// sur chaque route liée à l'inscription
+
+$registrationProcedure = RegistrationProcedure::loadFrom(from: $_SESSION["registration.procedure"] ?? null);
+
+if(!$registrationProcedure->next())
+    erreurDansLetapeCourante();
+
+if($registrationProcedure->isFinished())
+    actionDeFin();
+
 ```
